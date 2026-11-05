@@ -1669,3 +1669,61 @@ a {
   background: #c0602a;
   transform: scale(0.9);
 }
+
+/* 玩家自訂姓名與頭頂名牌 */
+.player-nameplate {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: rgba(35, 25, 18, 0.92);
+  color: #fffaf2;
+  border: 1.5px solid #ffd166;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  padding: 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 800;
+  pointer-events: none;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  z-index: 27;
+  transition: opacity 0.2s ease;
+}
+
+.player-nameplate .p-badge {
+  background: #e63946;
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.player-nameplate.hidden {
+  display: none !important;
+}
+
+/* 角色換裝與取名彈窗選項 */
+.avatar-colors {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 14px;
+}
+
+.color-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-dot:hover, .color-dot.on {
+  transform: scale(1.18);
+  border-color: var(--ink);
+  outline: 2px solid var(--accent);
+}

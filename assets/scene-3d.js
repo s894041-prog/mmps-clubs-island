@@ -1724,8 +1724,9 @@
     addBox(pLegR, [0.1, 0.26, 0.12], "#1d3557", [0, -0.13, 0]);
     pBody.add(pLegR);
 
-    // 軀幹（亮黃/藍色活潑休閒 T-shirt）
-    addBox(pBody, [0.32, 0.34, 0.2], "#e63946", [0, 0.42, 0]);
+    // 軀幹（亮黃/藍色活潑休閒 T-shirt，獨立材質以支援自訂換裝）
+    const pTorsoMat = new THREE.MeshStandardMaterial({ color: new THREE.Color("#e63946"), roughness: 0.7 });
+    const pTorsoMesh = addBox(pBody, [0.32, 0.34, 0.2], "#e63946", [0, 0.42, 0], null, { material: pTorsoMat });
 
     // 黃色雙肩書包
     addBox(pBody, [0.26, 0.28, 0.12], "#ffd166", [0, 0.42, -0.14]);
@@ -1733,19 +1734,26 @@
     // 雙手
     const pArmL = new THREE.Group();
     pArmL.position.set(-0.21, 0.52, 0);
-    addBox(pArmL, [0.08, 0.26, 0.09], "#e63946", [0, -0.12, 0]);
+    const pArmLMesh = addBox(pArmL, [0.08, 0.26, 0.09], "#e63946", [0, -0.12, 0], null, { material: pTorsoMat });
     pBody.add(pArmL);
 
     const pArmR = new THREE.Group();
     pArmR.position.set(0.21, 0.52, 0);
-    addBox(pArmR, [0.08, 0.26, 0.09], "#e63946", [0, -0.12, 0]);
+    const pArmRMesh = addBox(pArmR, [0.08, 0.26, 0.09], "#e63946", [0, -0.12, 0], null, { material: pTorsoMat });
     pBody.add(pArmR);
 
-    // 頭部與小鴨舌帽
+    // 頭部與小鴨舌帽（獨立材質以支援換帽子顏色）
     addSphere(pBody, 0.17, "#f4c89e", [0, 0.74, 0], 14);
     addSphere(pBody, 0.175, "#2b2018", [0, 0.77, -0.02], 14);
-    addCyl(pBody, 0.176, 0.176, 0.06, "#2a9d8f", [0, 0.85, 0], null, 14);
-    addBox(pBody, [0.22, 0.03, 0.15], "#2a9d8f", [0, 0.84, 0.14]);
+    const pHatMat = new THREE.MeshStandardMaterial({ color: new THREE.Color("#2a9d8f"), roughness: 0.6 });
+    const pHatCylMesh = addCyl(pBody, 0.176, 0.176, 0.06, "#2a9d8f", [0, 0.85, 0], null, 14, { material: pHatMat });
+    const pHatBrimMesh = addBox(pBody, [0.22, 0.03, 0.15], "#2a9d8f", [0, 0.84, 0.14], null, { material: pHatMat });
+
+    // 玩家頭頂 3D 浮動姓名牌
+    const pNameplateEl = document.createElement("div");
+    pNameplateEl.className = "player-nameplate hidden";
+    pNameplateEl.innerHTML = `<span class="p-badge" id="p-np-badge">探險家</span><span id="p-np-name">馬鳴小創客</span>`;
+    labelLayerEl.appendChild(pNameplateEl);
 
     // 腳底陰影圓盤
     const pShadow = new THREE.Mesh(
@@ -1861,11 +1869,33 @@
         this.roamMode = enabled;
         roamState.active = enabled;
         playerGroup.visible = enabled;
+        pNameplateEl.classList.toggle("hidden", !enabled);
         if (enabled) {
           camState.goalRadius = 9.2;
           camState.goalPhi = 0.96;
         } else {
           this.focusIsland(this.selectedId, "panorama");
+        }
+      },
+      updatePlayerCustom(cfg) {
+        if (!cfg) return;
+        if (cfg.name) {
+          const el = document.getElementById("p-np-name");
+          if (el) el.textContent = cfg.name;
+        }
+        if (cfg.title) {
+          const el = document.getElementById("p-np-badge");
+          if (el) el.textContent = cfg.title;
+        }
+        if (cfg.shirtColor && pTorsoMat) {
+          pTorsoMat.color.set(cfg.shirtColor);
+        }
+        if (cfg.hatColor && pHatMat) {
+          pHatMat.color.set(cfg.hatColor);
+        }
+        if (cfg.badgeColor) {
+          const el = document.getElementById("p-np-badge");
+          if (el) el.style.background = cfg.badgeColor;
         }
       },
       setVirtualInput(key, val) {
@@ -2168,6 +2198,21 @@
 
         // 第三人稱跟隨相機目標鎖定小學生
         camState.goalTarget.set(roamState.x, roamState.y + 0.85, roamState.z);
+
+        // 更新玩家頭頂 3D 浮動姓名牌位置
+        tempVec.set(roamState.x, roamState.y + 1.25, roamState.z);
+        tempVec.project(camera);
+        if (tempVec.z > 1) {
+          pNameplateEl.classList.add("hidden");
+        } else {
+          pNameplateEl.classList.remove("hidden");
+          const nx = (tempVec.x * 0.5 + 0.5) * window.innerWidth;
+          const ny = (-tempVec.y * 0.5 + 0.5) * window.innerHeight;
+          pNameplateEl.style.left = `${nx}px`;
+          pNameplateEl.style.top = `${ny}px`;
+        }
+      } else {
+        pNameplateEl.classList.add("hidden");
       }
 
       renderer.render(scene, camera);

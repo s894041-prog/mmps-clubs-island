@@ -23,6 +23,23 @@
   }
 
   // 全域 UI 狀態
+  
+  // 載入自訂角色設定
+  const defaultPlayerProfile = {
+    name: "小創客",
+    title: "馬鳴探險家",
+    shirtColor: "#e63946",
+    hatColor: "#2a9d8f",
+    badgeColor: "#e63946",
+    customized: false
+  };
+
+  let playerProfile = { ...defaultPlayerProfile };
+  try {
+    const saved = localStorage.getItem("mmps_player_profile");
+    if (saved) playerProfile = { ...defaultPlayerProfile, ...JSON.parse(saved) };
+  } catch (e) {}
+
   const state = {
     selected: null,
     hovered: null,
@@ -1129,6 +1146,7 @@
 
     // 初始化時間主題與即時上課狀態
     sceneApi.setTimeTheme(resolveTimeTheme(state.timeMode));
+    sceneApi.updatePlayerCustom(playerProfile);
     sceneApi.setLiveIslands(resolveLiveClubIds());
 
     renderQuote();
@@ -1197,6 +1215,7 @@
       const order = ["auto", "day", "dusk", "night"];
       state.timeMode = order[(order.indexOf(state.timeMode) + 1) % order.length];
       sceneApi.setTimeTheme(resolveTimeTheme(state.timeMode));
+    sceneApi.updatePlayerCustom(playerProfile);
       renderToolbar();
     };
 
@@ -1221,19 +1240,151 @@
     function setRoamMode(active) {
       state.roam = active;
       sceneApi.setRoamMode(active);
+      if (active) {
+        sceneApi.updatePlayerCustom(playerProfile);
+      }
       document.getElementById("btn-roam").classList.toggle("on", active);
       document.getElementById("roam-hud").classList.toggle("hidden", !active);
       const isMobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 780;
       document.getElementById("virtual-controls").classList.toggle("hidden", !active || !isMobile);
       if (active) {
-        showToast("🎮 已進入漫遊模式！使用鍵盤 WASD 移動、空白鍵跳躍");
+        showToast(`🎮 探險家【${playerProfile.name}】登場！使用 WASD 移動、空白鍵跳躍`);
+        if (!playerProfile.customized) {
+          setTimeout(openAvatarModal, 350);
+        }
       }
+    }
+
+    // 角色取名與換裝彈窗
+    function openAvatarModal() {
+      const wrap = document.getElementById("modal-wrap");
+      wrap.classList.remove("hidden");
+      renderAvatarModal();
+    }
+
+    function renderAvatarModal() {
+      const wrap = document.getElementById("modal-wrap");
+      const shirtColors = [
+        { c: "#e63946", label: "熱情紅" },
+        { c: "#3a86ff", label: "晴空藍" },
+        { c: "#ffbe0b", label: "活力黃" },
+        { c: "#2a9d8f", label: "青草綠" },
+        { c: "#8338ec", label: "星夜紫" },
+        { c: "#2b2d42", label: "酷黑" }
+      ];
+      const hatColors = [
+        { c: "#2a9d8f", label: "湖水綠" },
+        { c: "#e76f51", label: "晨曦橘" },
+        { c: "#457b9d", label: "海軍藍" },
+        { c: "#ffd166", label: "向日葵黃" },
+        { c: "#d62828", label: "烈焰紅" }
+      ];
+
+      wrap.innerHTML = `
+        <div class="modal-card" style="width:min(520px, 100%);">
+          <button class="x modal-close" id="modal-x">×</button>
+          <p class="eyebrow">CUSTOM EXPLORER CHARACTER</p>
+          <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;">🧑‍🚀 自訂我的馬鳴探險小學生</h2>
+          <p style="margin:0 0 14px;font-size:13.5px;color:var(--ink-2);">
+            為你的虛擬角色取一個響亮的名字與稱號，換上喜歡的服裝與運動帽，名字會直接顯示在角色頭頂跟隨奔跑！
+          </p>
+
+          <div style="background:var(--paper-2);border:1.5px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;">
+            <label style="display:block;font-size:12.5px;font-weight:800;color:var(--ink-2);margin-bottom:4px;">
+              探險家暱稱／學生姓名：
+            </label>
+            <input type="text" id="av-name-input" value="${playerProfile.name}" placeholder="輸入你的名字" style="width:100%;font-size:15px;font-weight:800;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;" />
+
+            <label style="display:block;font-size:12.5px;font-weight:800;color:var(--ink-2);margin:12px 0 4px;">
+              選擇身份稱號徽章：
+            </label>
+            <select id="av-title-select" style="width:100%;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;">
+              <option value="馬鳴探險家" ${playerProfile.title === "馬鳴探險家" ? "selected" : ""}>🌟 馬鳴探險家</option>
+              <option value="一年級萌新" ${playerProfile.title === "一年級萌新" ? "selected" : ""}>🌱 一年級萌新</option>
+              <option value="三年級學長" ${playerProfile.title === "三年級學長" ? "selected" : ""}>🚀 三年級學長</option>
+              <option value="六年級領航員" ${playerProfile.title === "六年級領航員" ? "selected" : ""}>🎓 六年級領航員</option>
+              <option value="DOC創客王" ${playerProfile.title === "DOC創客王" ? "selected" : ""}>⚙️ DOC 創客王</option>
+              <option value="獨輪車神人" ${playerProfile.title === "獨輪車神人" ? "selected" : ""}>🚲 獨輪車神人</option>
+              <option value="太鼓小達人" ${playerProfile.title === "太鼓小達人" ? "selected" : ""}>🥁 太鼓小達人</option>
+              <option value="文心墨客" ${playerProfile.title === "文心墨客" ? "selected" : ""}>🖌️ 文心墨客</option>
+            </select>
+
+            <label style="display:block;font-size:12.5px;font-weight:800;color:var(--ink-2);margin:14px 0 6px;">
+              T-shirt 服裝顏色：
+            </label>
+            <div class="avatar-colors">
+              ${shirtColors.map(s => `
+                <div class="color-dot ${playerProfile.shirtColor === s.c ? "on" : ""}" style="background:${s.c};" data-shirt="${s.c}" title="${s.label}"></div>
+              `).join("")}
+            </div>
+
+            <label style="display:block;font-size:12.5px;font-weight:800;color:var(--ink-2);margin:10px 0 6px;">
+              運動棒球帽顏色：
+            </label>
+            <div class="avatar-colors" style="margin-bottom:0;">
+              ${hatColors.map(h => `
+                <div class="color-dot ${playerProfile.hatColor === h.c ? "on" : ""}" style="background:${h.c};" data-hat="${h.c}" title="${h.label}"></div>
+              `).join("")}
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:12px;color:var(--muted);">
+              頭頂即時名牌：<span style="background:${playerProfile.badgeColor};color:#fff;border-radius:999px;padding:1px 6px;font-size:10px;">${playerProfile.title}</span> <b>${playerProfile.name}</b>
+            </div>
+            <button class="reg-btn" id="av-save-btn" style="padding:10px 20px;">
+              🚀 儲存造型並出發！
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("modal-x").onclick = () => wrap.classList.add("hidden");
+
+      // 顏色點選即時反應
+      wrap.querySelectorAll("[data-shirt]").forEach(dot => {
+        dot.onclick = () => {
+          playerProfile.shirtColor = dot.dataset.shirt;
+          playerProfile.badgeColor = dot.dataset.shirt;
+          sceneApi.updatePlayerCustom(playerProfile);
+          renderAvatarModal();
+        };
+      });
+
+      wrap.querySelectorAll("[data-hat]").forEach(dot => {
+        dot.onclick = () => {
+          playerProfile.hatColor = dot.dataset.hat;
+          sceneApi.updatePlayerCustom(playerProfile);
+          renderAvatarModal();
+        };
+      });
+
+      document.getElementById("av-name-input").oninput = (e) => {
+        playerProfile.name = e.target.value.trim() || "小創客";
+        sceneApi.updatePlayerCustom(playerProfile);
+      };
+
+      document.getElementById("av-title-select").onchange = (e) => {
+        playerProfile.title = e.target.value;
+        sceneApi.updatePlayerCustom(playerProfile);
+      };
+
+      document.getElementById("av-save-btn").onclick = () => {
+        playerProfile.customized = true;
+        try {
+          localStorage.setItem("mmps_player_profile", JSON.stringify(playerProfile));
+        } catch (e) {}
+        sceneApi.updatePlayerCustom(playerProfile);
+        wrap.classList.add("hidden");
+        showToast(`✨ 自訂完成！探險家【${playerProfile.name}】準備出發！`);
+      };
     }
 
     document.getElementById("btn-roam").onclick = () => {
       setRoamMode(!state.roam);
     };
 
+    document.getElementById("roam-custom-btn").onclick = () => openAvatarModal();
     document.getElementById("roam-exit-btn").onclick = () => {
       setRoamMode(false);
     };
