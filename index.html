@@ -160,10 +160,36 @@
           <button id="tb-log" class="tb on" title="顯示或隱藏左側即時雷達">雷達</button>
         </div>
 
+        <button id="btn-roam" class="tour-btn" style="background:linear-gradient(135deg, #10b981, #059669);" title="操縱小學生角色在浮空島上自由奔跑">🎮 自由漫遊</button>
         <button id="btn-tour" class="tour-btn" title="自動巡航導覽 9 座浮空島">✈️ 群島導覽</button>
         <button id="btn-quiz" class="quiz-btn" title="6 題測出最適合你的馬鳴社團">✨ 適性小測驗</button>
         <button id="btn-slip" class="reg-btn" title="填寫與列印 115-1 社團報名回條">📝 報名回條</button>
       </nav>
+
+      <!-- 漫遊模式 HUD 與提示 -->
+      <div id="roam-hud" class="roam-hud hidden">
+        <span>🎮 漫遊中：</span>
+        <span class="hud-key">WASD</span> 移動
+        <span class="hud-key">Space</span> 跳躍
+        <span class="hud-key">Shift</span> 加速
+        <span id="roam-near-text" style="color:#ffd166;margin-left:6px;"></span>
+        <button id="roam-action-btn" class="hud-action" style="display:none;">開啟社團 (E)</button>
+        <button id="roam-exit-btn" class="hud-action" style="background:#e63946;margin-left:auto;">結束 (Esc)</button>
+      </div>
+
+      <!-- 行動裝置虛擬搖桿與按鈕 -->
+      <div id="virtual-controls" class="virtual-controls hidden">
+        <div class="v-dpad">
+          <button class="v-btn up" id="v-up">▲</button>
+          <button class="v-btn left" id="v-left">◀</button>
+          <button class="v-btn down" id="v-down">▼</button>
+          <button class="v-btn right" id="v-right">▶</button>
+        </div>
+        <div class="v-actions">
+          <button class="v-action-btn" id="v-jump">跳躍</button>
+          <button class="v-action-btn" id="v-interact" style="background:#10b981;font-size:12px;">互動</button>
+        </div>
+      </div>
 
       <!-- 多功能彈窗容器（平面圖／適性測驗／報名回條） -->
       <div id="modal-wrap" class="modal-wrap hidden" role="dialog" aria-modal="true"></div>

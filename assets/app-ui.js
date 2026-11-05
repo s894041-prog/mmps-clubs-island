@@ -40,6 +40,8 @@
     tour: null, // { idx: 0, paused: false, progress: 0 }
     quizStep: 0,
     quizAnswers: [],
+    roam: false,
+    currentNearIsland: "hub",
     slip: {
       grade: "3",
       cls: "三年甲班",
@@ -1069,6 +1071,7 @@
     document.getElementById("tb-time").textContent = timeLabels[state.timeMode];
     document.getElementById("tb-fx").classList.toggle("on", state.fx);
     document.getElementById("tb-log").classList.toggle("on", state.showLog);
+    document.getElementById("btn-roam").classList.toggle("on", state.roam);
     document.getElementById("btn-tour").classList.toggle("on", !!state.tour);
     document.getElementById("btn-tour").textContent = state.tour ? "⏹ 結束導覽" : "✈️ 群島導覽";
 
@@ -1103,6 +1106,25 @@
             ? `🦄 找到躲在「${club.short}」的馬鳴小天馬！（${state.foundMascots.size} / ${islands.length}）`
             : `🦄 「${club.short}」的小天馬開心地向你揮手！`
         );
+      },
+      onPlayerNearIsland(islandId) {
+        state.currentNearIsland = islandId;
+        const club = islandMap[islandId];
+        const txt = document.getElementById("roam-near-text");
+        const actBtn = document.getElementById("roam-action-btn");
+        if (club && islandId !== "hub") {
+          txt.textContent = `📍 已抵達【${club.short}】（${club.location}）`;
+          actBtn.style.display = "inline-block";
+          actBtn.textContent = `探索 ${club.short} (E)`;
+        } else {
+          txt.textContent = `📍 目前在【馬鳴主島・行政中心】`;
+          actBtn.style.display = "none";
+        }
+      },
+      onPlayerInteract(islandId) {
+        if (islandId && islandId !== "hub") {
+          selectIsland(islandId);
+        }
       }
     });
 
@@ -1195,6 +1217,65 @@
       if (state.tour) stopTour();
       else startTour();
     };
+
+    // 漫遊模式切換與控制
+    function setRoamMode(active) {
+      state.roam = active;
+      sceneApi.setRoamMode(active);
+      document.getElementById("btn-roam").classList.toggle("on", active);
+      document.getElementById("roam-hud").classList.toggle("hidden", !active);
+      const isMobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 780;
+      document.getElementById("virtual-controls").classList.toggle("hidden", !active || !isMobile);
+      if (active) {
+        showToast("🎮 已進入漫遊模式！使用鍵盤 WASD 移動、空白鍵跳躍");
+      }
+    }
+
+    document.getElementById("btn-roam").onclick = () => {
+      setRoamMode(!state.roam);
+    };
+
+    document.getElementById("roam-exit-btn").onclick = () => {
+      setRoamMode(false);
+    };
+
+    document.getElementById("roam-action-btn").onclick = () => {
+      if (state.currentNearIsland && state.currentNearIsland !== "hub") {
+        selectIsland(state.currentNearIsland);
+      }
+    };
+
+    // 虛擬搖桿與按鈕
+    const bindVKey = (id, key) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        sceneApi.setVirtualInput(key, true);
+      });
+      el.addEventListener("pointerup", (e) => {
+        e.preventDefault();
+        sceneApi.setVirtualInput(key, false);
+      });
+      el.addEventListener("pointerleave", (e) => {
+        sceneApi.setVirtualInput(key, false);
+      });
+    };
+
+    bindVKey("v-up", "forward");
+    bindVKey("v-down", "backward");
+    bindVKey("v-left", "left");
+    bindVKey("v-right", "right");
+    bindVKey("v-jump", "jump");
+
+    const vInteract = document.getElementById("v-interact");
+    if (vInteract) {
+      vInteract.onclick = () => {
+        if (state.currentNearIsland && state.currentNearIsland !== "hub") {
+          selectIsland(state.currentNearIsland);
+        }
+      };
+    }
 
     document.getElementById("btn-quiz").onclick = () => openQuizModal();
     document.getElementById("btn-slip").onclick = () => openSlipModal();

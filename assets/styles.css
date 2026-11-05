@@ -1530,3 +1530,142 @@ a {
     justify-content: space-between;
   }
 }
+/* 漫遊模式與虛擬按鈕樣式 */
+.roam-hud {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 28;
+  background: rgba(35, 25, 18, 0.88);
+  color: #fffaf2;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  animation: popDown 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  backdrop-filter: blur(6px);
+}
+
+.roam-hud.hidden {
+  display: none;
+}
+
+@keyframes popDown {
+  from { opacity: 0; transform: translate(-50%, -15px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.roam-hud .hud-key {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 11.5px;
+  color: #ffd166;
+}
+
+.roam-hud .hud-action {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.roam-hud .hud-action:hover {
+  transform: scale(1.08);
+}
+
+/* 行動裝置虛擬控制器 (Virtual Joypad) */
+.virtual-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  pointer-events: none;
+}
+
+.virtual-controls.hidden {
+  display: none;
+}
+
+.v-dpad {
+  position: absolute;
+  bottom: 82px;
+  left: 20px;
+  width: 140px;
+  height: 140px;
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.v-btn {
+  background: rgba(255, 250, 242, 0.85);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow);
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.v-btn:active {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(0.92);
+}
+
+.v-btn.up { grid-column: 2; grid-row: 1; }
+.v-btn.left { grid-column: 1; grid-row: 2; }
+.v-btn.down { grid-column: 2; grid-row: 3; }
+.v-btn.right { grid-column: 3; grid-row: 2; }
+
+.v-actions {
+  position: absolute;
+  bottom: 86px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.v-action-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(227, 155, 45, 0.92);
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: var(--shadow);
+  font-size: 13.5px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.v-action-btn:active {
+  background: #c0602a;
+  transform: scale(0.9);
+}

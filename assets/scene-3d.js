@@ -1700,6 +1700,153 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    
+    // =========================================================
+    // 漫遊模式：可操控小學生探險家 (RPG Third-Person Controller)
+    // =========================================================
+    const playerGroup = new THREE.Group();
+    playerGroup.position.set(0, ISLAND_HEIGHT + 0.1, 2.2); // 初始在主島中央
+    playerGroup.visible = false;
+    scene.add(playerGroup);
+
+    // 玩家身體組件
+    const pBody = new THREE.Group();
+    playerGroup.add(pBody);
+
+    // 雙腳
+    const pLegL = new THREE.Group();
+    pLegL.position.set(-0.08, 0.24, 0);
+    addBox(pLegL, [0.1, 0.26, 0.12], "#1d3557", [0, -0.13, 0]);
+    pBody.add(pLegL);
+
+    const pLegR = new THREE.Group();
+    pLegR.position.set(0.08, 0.24, 0);
+    addBox(pLegR, [0.1, 0.26, 0.12], "#1d3557", [0, -0.13, 0]);
+    pBody.add(pLegR);
+
+    // 軀幹（亮黃/藍色活潑休閒 T-shirt）
+    addBox(pBody, [0.32, 0.34, 0.2], "#e63946", [0, 0.42, 0]);
+
+    // 黃色雙肩書包
+    addBox(pBody, [0.26, 0.28, 0.12], "#ffd166", [0, 0.42, -0.14]);
+
+    // 雙手
+    const pArmL = new THREE.Group();
+    pArmL.position.set(-0.21, 0.52, 0);
+    addBox(pArmL, [0.08, 0.26, 0.09], "#e63946", [0, -0.12, 0]);
+    pBody.add(pArmL);
+
+    const pArmR = new THREE.Group();
+    pArmR.position.set(0.21, 0.52, 0);
+    addBox(pArmR, [0.08, 0.26, 0.09], "#e63946", [0, -0.12, 0]);
+    pBody.add(pArmR);
+
+    // 頭部與小鴨舌帽
+    addSphere(pBody, 0.17, "#f4c89e", [0, 0.74, 0], 14);
+    addSphere(pBody, 0.175, "#2b2018", [0, 0.77, -0.02], 14);
+    addCyl(pBody, 0.176, 0.176, 0.06, "#2a9d8f", [0, 0.85, 0], null, 14);
+    addBox(pBody, [0.22, 0.03, 0.15], "#2a9d8f", [0, 0.84, 0.14]);
+
+    // 腳底陰影圓盤
+    const pShadow = new THREE.Mesh(
+      new THREE.CircleGeometry(0.35, 16),
+      new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 0.35, depthWrite: false })
+    );
+    pShadow.rotation.x = -Math.PI / 2;
+    pShadow.position.y = 0.015;
+    playerGroup.add(pShadow);
+
+    // 漫遊控制狀態
+    const roamState = {
+      active: false,
+      x: 0,
+      z: 2.2,
+      y: ISLAND_HEIGHT + 0.1,
+      vy: 0,
+      onGround: true,
+      yaw: 0,
+      speed: 0,
+      runAnim: 0,
+      keys: { forward: false, backward: false, left: false, right: false, jump: false, sprint: false },
+      nearIsland: "hub"
+    };
+
+    // 鍵盤監聽
+    window.addEventListener("keydown", (e) => {
+      if (!roamState.active) return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.code === "KeyW" || e.code === "ArrowUp") roamState.keys.forward = true;
+      if (e.code === "KeyS" || e.code === "ArrowDown") roamState.keys.backward = true;
+      if (e.code === "KeyA" || e.code === "ArrowLeft") roamState.keys.left = true;
+      if (e.code === "KeyD" || e.code === "ArrowRight") roamState.keys.right = true;
+      if (e.code === "Space") {
+        if (roamState.onGround) {
+          roamState.vy = 0.19;
+          roamState.onGround = false;
+        }
+        e.preventDefault();
+      }
+      if (e.code === "ShiftLeft" || e.code === "ShiftRight") roamState.keys.sprint = true;
+      if (e.code === "KeyE") {
+        if (callbacks.onPlayerInteract) callbacks.onPlayerInteract(roamState.nearIsland);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (!roamState.active) return;
+      if (e.code === "KeyW" || e.code === "ArrowUp") roamState.keys.forward = false;
+      if (e.code === "KeyS" || e.code === "ArrowDown") roamState.keys.backward = false;
+      if (e.code === "KeyA" || e.code === "ArrowLeft") roamState.keys.left = false;
+      if (e.code === "KeyD" || e.code === "ArrowRight") roamState.keys.right = false;
+      if (e.code === "ShiftLeft" || e.code === "ShiftRight") roamState.keys.sprint = false;
+    });
+
+    // 地形高度與島嶼/橋樑判定
+    function getGroundHeight(x, z) {
+      // 1. 中央主島
+      const dHub = Math.hypot(x, z);
+      if (dHub <= ISLAND_RADIUS * 0.96) {
+        return { y: ISLAND_HEIGHT + 0.1, island: "hub", valid: true };
+      }
+
+      // 2. 8 座社團環島
+      for (let i = 0; i < outerIslands.length; i++) {
+        const item = outerIslands[i];
+        const pos = ISLAND_POS[item.id];
+        const dist = Math.hypot(x - pos[0], z - pos[2]);
+        if (dist <= ISLAND_RADIUS * 0.96) {
+          return { y: ISLAND_HEIGHT + pos[1] + 0.1, island: item.id, valid: true };
+        }
+      }
+
+      // 3. 八條雲海空橋 (Bridge Connection)
+      const r = Math.hypot(x, z);
+      const angle = Math.atan2(z, x); // -PI ~ PI
+      const startR = ISLAND_RADIUS * 0.88;
+      const endR = RING_RADIUS - ISLAND_RADIUS * 0.88;
+
+      if (r >= startR && r <= endR + 1.2) {
+        for (let i = 0; i < outerIslands.length; i++) {
+          const item = outerIslands[i];
+          const bAngle = ISLAND_ANGLES[item.id];
+          let diff = Math.abs(angle - bAngle);
+          while (diff > Math.PI) diff = Math.abs(diff - Math.PI * 2);
+
+          const maxAngularWidth = 0.85 / r; // 橋面寬度約 0.95
+          if (diff <= maxAngularWidth) {
+            const u = Math.min(1, Math.max(0, (r - startR) / (endR - startR)));
+            const targetY = ISLAND_POS[item.id][1];
+            const arch = Math.sin(u * Math.PI) * 0.75;
+            const y = (ISLAND_HEIGHT + 0.1) * (1 - u) + (ISLAND_HEIGHT + targetY + 0.1) * u + arch;
+            return { y: y, island: item.id, valid: true };
+          }
+        }
+      }
+
+      // 邊緣或雲海安全托底
+      return { y: ISLAND_HEIGHT + 0.1, island: null, valid: false };
+    }
+
     // 外部控制 API
     const api = {
       selectedId: null,
@@ -1708,6 +1855,31 @@
       showLabels: true,
       showLinks: false,
       activeLiveIds: new Set(["hub"]),
+
+            roamMode: false,
+      setRoamMode(enabled) {
+        this.roamMode = enabled;
+        roamState.active = enabled;
+        playerGroup.visible = enabled;
+        if (enabled) {
+          camState.goalRadius = 9.2;
+          camState.goalPhi = 0.96;
+        } else {
+          this.focusIsland(this.selectedId, "panorama");
+        }
+      },
+      setVirtualInput(key, val) {
+        if (roamState.keys[key] !== undefined) {
+          roamState.keys[key] = val;
+        }
+        if (key === "jump" && val && roamState.onGround) {
+          roamState.vy = 0.19;
+          roamState.onGround = false;
+        }
+      },
+      triggerNearInteract() {
+        if (callbacks.onPlayerInteract) callbacks.onPlayerInteract(roamState.nearIsland);
+      },
 
       focusIsland(id, viewMode = "panorama") {
         this.selectedId = id;
@@ -1911,6 +2083,92 @@
         camState.target.z + camState.radius * Math.sin(camState.phi) * Math.cos(camState.theta);
       camera.position.set(cx, cy, cz);
       camera.lookAt(camState.target);
+
+      
+      // 漫遊模式角色運動更新
+      if (roamState.active) {
+        const moveSpeed = (roamState.keys.sprint ? 0.14 : 0.082);
+        let moveX = 0;
+        let moveZ = 0;
+
+        // 依相機水平朝向計算前後左右
+        const forwardTheta = camState.theta;
+        const sinT = Math.sin(forwardTheta);
+        const cosT = Math.cos(forwardTheta);
+
+        if (roamState.keys.forward) {
+          moveX -= sinT;
+          moveZ -= cosT;
+        }
+        if (roamState.keys.backward) {
+          moveX += sinT;
+          moveZ += cosT;
+        }
+        if (roamState.keys.left) {
+          moveX -= cosT;
+          moveZ += sinT;
+        }
+        if (roamState.keys.right) {
+          moveX += cosT;
+          moveZ -= sinT;
+        }
+
+        const len = Math.hypot(moveX, moveZ);
+        if (len > 0.001) {
+          moveX = (moveX / len) * moveSpeed;
+          moveZ = (moveZ / len) * moveSpeed;
+
+          // 碰撞與防墜判定：預先探測下一步地面
+          const nextCheck = getGroundHeight(roamState.x + moveX, roamState.z + moveZ);
+          if (nextCheck.valid) {
+            roamState.x += moveX;
+            roamState.z += moveZ;
+          } else {
+            // 輕微阻擋邊界，不讓玩家跌下雲海
+            const checkX = getGroundHeight(roamState.x + moveX, roamState.z);
+            if (checkX.valid) roamState.x += moveX;
+            const checkZ = getGroundHeight(roamState.x, roamState.z + moveZ);
+            if (checkZ.valid) roamState.z += moveZ;
+          }
+
+          roamState.yaw = Math.atan2(moveX, moveZ);
+          roamState.runAnim += dt * (roamState.keys.sprint ? 18 : 11);
+          pLegL.rotation.x = Math.sin(roamState.runAnim) * 0.72;
+          pLegR.rotation.x = -Math.sin(roamState.runAnim) * 0.72;
+          pArmL.rotation.x = -Math.sin(roamState.runAnim) * 0.65;
+          pArmR.rotation.x = Math.sin(roamState.runAnim) * 0.65;
+        } else {
+          pLegL.rotation.x *= 0.8;
+          pLegR.rotation.x *= 0.8;
+          pArmL.rotation.x *= 0.8;
+          pArmR.rotation.x *= 0.8;
+        }
+
+        // 重力與垂直位移
+        const ground = getGroundHeight(roamState.x, roamState.z);
+        roamState.y += roamState.vy;
+        roamState.vy -= 0.012; // 重力加速度
+
+        if (roamState.y <= ground.y) {
+          roamState.y = ground.y;
+          roamState.vy = 0;
+          roamState.onGround = true;
+        }
+
+        playerGroup.position.set(roamState.x, roamState.y, roamState.z);
+        playerGroup.rotation.y = roamState.yaw;
+
+        // 偵測是否走到某座社團島
+        if (ground.island && ground.island !== roamState.nearIsland) {
+          roamState.nearIsland = ground.island;
+          if (callbacks.onPlayerNearIsland) {
+            callbacks.onPlayerNearIsland(ground.island);
+          }
+        }
+
+        // 第三人稱跟隨相機目標鎖定小學生
+        camState.goalTarget.set(roamState.x, roamState.y + 0.85, roamState.z);
+      }
 
       renderer.render(scene, camera);
     }
