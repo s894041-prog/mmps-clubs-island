@@ -1200,7 +1200,7 @@
         );
       });
 
-      // DOC 指導老師
+      // 陳老師指導
       parent.add(
         createPerson(
           {

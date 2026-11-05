@@ -426,13 +426,13 @@ window.MMPS_ISLANDS = [
     tagline: "於馬鳴 DOC 教室動手玩科學！齒輪傳動、結構力學與智高機關王實作。",
     gradeTarget: "一～六年級（混齡分組創客）",
     gradeCodes: [1, 2, 3, 4, 5, 6],
-    scheduleText: "星期三 13:30–15:00（創客實作時段）",
-    dayOfWeek: [3],
-    timeSlots: ["wed_pm1", "wed_pm2"],
+    scheduleText: "星期四 12:40～13:20（午間午休時段）",
+    dayOfWeek: [4],
+    timeSlots: ["thu_noon"],
     location: "DOC 教室",
     floor: "2F 右側（視聽教室與電腦教室之間）",
-    teacher: "DOC 創客師資團隊（蔡老師）",
-    startDate: "9/16(三)起",
+    teacher: "陳老師",
+    startDate: "9/17(四)起",
     enrolled: 20,
     capacity: 22,
     gradeDist: [
@@ -448,7 +448,7 @@ window.MMPS_ISLANDS = [
     },
     sceneDesc: "馬鳴 DOC 數位機會中心前，巨型彩色智高齒輪組正彼此咬合旋轉，智高機械手臂與風力機關車動態運作，小創客們戴著護目鏡組裝測試連桿結構！",
     intro: [
-      "「智高社團（Gigo 創客積木社）」特別結合馬鳴國小二樓 **DOC 教室（數位機會中心）** 的優質創客空間與教材資源，帶領孩子從「玩積木」進階到「懂工程、玩科學」！",
+      "「智高社團（Gigo 創客積木社）」由專業的陳老師指導，特別結合馬鳴國小二樓 **DOC 教室（數位機會中心）** 的優質創客空間與教材資源，利用每週四中午午休（12:40–13:20）輕鬆時光，帶領孩子從「玩積木」進階到「懂工程、玩科學」！",
       "課程採用世界知名的臺灣精品「智高（Gigo）科技積木」，透過一顆凸點、五面連接的專利結構，結合齒輪比、滑輪、槓桿、連桿機構、橡皮筋動力與綠色能源，讓學生親手設計出會走動的機械獸、投石器與連鎖反應『機關王』關卡！"
     ],
     courses: ["智高結構力學與桁架橋", "齒輪咬合、加速與減速機構", "連桿與凸輪仿生機械獸", "橡皮筋與風力潔淨能源車", "グリーン機關王連鎖關卡設計"],
@@ -459,8 +459,8 @@ window.MMPS_ISLANDS = [
       "儲備臺中市與全國「世界機關王大賽（GreenMech）」校園代表隊選手"
     ],
     announcements: [
-      { date: "115/09/16", unit: "智高社團", title: "新增熱門社團！於 2F DOC 教室（視聽教室旁）開課，歡迎喜愛動手做的同學報名" },
-      { date: "115/09/16", unit: "智高社團", title: "課堂積木零件豐富，下課前將進行分格清點與作品展示發表" }
+      { date: "115/09/17", unit: "智高社團", title: "陳老師於每週四中午午休（12:40-13:20）在 2F DOC 教室開課，歡迎喜愛動手做的同學報名" },
+      { date: "115/09/17", unit: "智高社團", title: "課堂積木零件豐富，下課前將進行分格清點與作品展示發表" }
     ]
   }
 ];
@@ -481,9 +481,10 @@ window.MMPS_SLOTS = [
   { id: "mon_pm", label: "週一放學｜獨輪車", desc: "星期一 15:10-16:40 操場獨輪車分齡練習中", activeIds: ["unicycle"] },
   { id: "tue_noon", label: "週二午間｜書法社", desc: "星期二 12:40-13:20 2F 會議室校長書法課", activeIds: ["calligraphy"] },
   { id: "wed_noon", label: "週三午間｜節奏樂", desc: "星期三 12:40-14:20 2F 英語教室節奏樂合奏", activeIds: ["rhythm"] },
-  { id: "wed_pm1", label: "週三下午｜太鼓初・智高", desc: "星期三 13:50 視聽教室太鼓初階 & DOC 教室智高社團", activeIds: ["taiko_jr", "gigo"] },
-  { id: "wed_pm2", label: "週三下午｜太鼓進・智高", desc: "星期三 14:50 視聽教室太鼓進階 & DOC 教室智高創客", activeIds: ["taiko_sr", "gigo"] },
+  { id: "wed_pm1", label: "週三下午｜太鼓初階", desc: "星期三 13:50 視聽教室太鼓初階", activeIds: ["taiko_jr"] },
+  { id: "wed_pm2", label: "週三下午｜太鼓進階", desc: "星期三 14:50 視聽教室太鼓進階", activeIds: ["taiko_sr"] },
   { id: "thu_am", label: "週四晨光｜舞獅社", desc: "星期四 07:30-08:00 1F 風雨教室祥獅獻瑞晨練", activeIds: ["lion"] },
+  { id: "thu_noon", label: "週四午間｜智高社", desc: "星期四 12:40-13:20 2F DOC 教室陳老師智高創客社", activeIds: ["gigo"] },
   { id: "fri_am", label: "週五晨光｜英語社", desc: "星期五 07:50-08:20 2F 英語教室環球雙語互動", activeIds: ["english"] }
 ];
 
@@ -540,8 +541,8 @@ window.MMPS_QUIZ = [
     q: "你最喜歡哪一個上課時段？",
     a: [
       ["早上剛到學校精神最好（週四／週五晨光時間）", { lion: 3, english: 3 }],
-      ["中午吃飽飯後的悠閒時光（週二／週三午間）", { calligraphy: 3, rhythm: 3 }],
-      ["星期三下午的社團歡樂時光", { taiko_jr: 3, taiko_sr: 3, gigo: 3 }],
+      ["中午吃飽飯後的悠閒時光（週二／週三／週四午間午休）", { calligraphy: 3, rhythm: 3, gigo: 4 }],
+      ["星期三下午的社團歡樂時光（太鼓初／進階）", { taiko_jr: 3, taiko_sr: 3 }],
       ["星期一放學後在陽光操場奔馳", { unicycle: 4 }]
     ]
   },

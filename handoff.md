@@ -1,11 +1,11 @@
 # handoff.md – 交接日誌
 
 ## 最近一次收工
-- 日期：2026-11-05 11:44:00
+- 日期：2026-11-05 11:58:00
 - 電腦：Admin-PC
 - 完成項目：
-  - 全站社團指導老師姓名去個資化（改為彭校長、吳老師、施老師、黃老師、林老師、蔡老師、DOC 師資團隊）
-  - 原版含有學童姓名之 .doc 檔案已加入 .gitignore，避免個資外洩
-  - 成功建立 GitHub 公開儲存庫並推向上線：`https://github.com/s894041-prog/mmps-clubs-island`
-  - 成功開啟 GitHub Pages 線上服務：`https://s894041-prog.github.io/mmps-clubs-island/`
+  - 更新智高創客社師資為「陳老師」
+  - 上課時段調整為「星期四 12:40～13:20（午間午休時段）」，開課日為 9/17(四)起
+  - 更新即時時段模擬器雷達（週四午間加入智高社）、取消原週三衝堂警告並新增週四「舞獅＋智高」文武雙全推薦
+  - 重新 git commit 並 push 到 GitHub repository 與 GitHub Pages
 - 未完成項目：無

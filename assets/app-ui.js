@@ -88,9 +88,11 @@
       if (mins >= 12 * 60 + 40 && mins <= 14 * 60 + 20) active.push("rhythm");
       if (mins >= 13 * 60 + 50 && mins <= 14 * 60 + 50) active.push("taiko_jr");
       if (mins >= 14 * 60 + 50 && mins <= 15 * 60 + 50) active.push("taiko_sr");
-      if (mins >= 13 * 60 + 30 && mins <= 15 * 60) active.push("gigo");
     }
-    if (day === 4 && mins >= 7 * 60 + 30 && mins <= 8 * 60) active.push("lion");
+    if (day === 4) {
+      if (mins >= 7 * 60 + 30 && mins <= 8 * 60) active.push("lion");
+      if (mins >= 12 * 60 + 40 && mins <= 13 * 60 + 20) active.push("gigo");
+    }
     if (day === 5 && mins >= 7 * 60 + 50 && mins <= 8 * 60 + 20) active.push("english");
     return active.length ? active : ["hub"];
   }
@@ -199,8 +201,8 @@
       {
         islandId: "gigo",
         tag: "新增社團",
-        time: "週三 13:30",
-        title: "全新【智高創客社】於 2F DOC 教室開課！歡迎喜愛機關積木同學參加"
+        time: "週四 12:40",
+        title: "全新【智高創客社】陳老師於每週四中午午休在 2F DOC 教室開課！歡迎參加"
       },
       {
         islandId: "unicycle",
@@ -921,11 +923,8 @@
     // 檢查衝堂與年段資格提示
     const warnings = [];
     const sel = state.slip.selectedClubs;
-    if (sel.has("taiko_jr") && sel.has("gigo")) {
-      warnings.push("⚠️ 【時間重疊提醒】「太鼓初階（週三 13:50-14:50）」與「智高社團（週三 13:30-15:00）」同為週三下午時段，建議擇一報名。");
-    }
-    if (sel.has("rhythm") && sel.has("gigo")) {
-      warnings.push("⚠️ 【時間部分重疊】「節奏樂社（週三 12:40-14:20）」與「智高社團（週三 13:30-15:00）」有 50 分鐘重疊。");
+    if (sel.has("lion") && sel.has("gigo")) {
+      warnings.push("✨ 【週四文武雙全推薦】週四晨光「舞獅社（07:30–08:00）」鍛鍊體能，週四午休「智高社團（12:40–13:20）」動手動腦，時間完美錯開！");
     }
     if (sel.has("rhythm") && sel.has("taiko_sr")) {
       warnings.push("✨ 【完美銜接組合】週三「節奏樂社（14:20下課）」可無縫接著上「太鼓進階（14:50上課）」！");
