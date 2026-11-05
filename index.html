@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>馬鳴國小社團群島｜115學年度天空之城 3D 社團探索互動網</title>
+    <meta
+      name="description"
+      content="臺中市外埔區馬鳴國民小學 115 學年度學生社團即時資訊 3D 互動網站：獨輪車社、書法社、太鼓初階、太鼓進階、節奏樂社、舞獅社、英語社與 DOC 智高創客社。"
+    />
+    <meta name="theme-color" content="#bfe3f2" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      @media print {
+        body * {
+          visibility: hidden !important;
+        }
+        #modal-wrap,
+        #printable-slip,
+        #printable-slip * {
+          visibility: visible !important;
+        }
+        #modal-wrap {
+          position: absolute !important;
+          inset: 0 !important;
+          background: #fff !important;
+          padding: 0 !important;
+        }
+        .modal-card {
+          box-shadow: none !important;
+          border: none !important;
+          width: 100% !important;
+          max-height: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- 3D 雲海浮空島舞台 -->
+      <div id="stage-canvas" class="stage" aria-label="馬鳴國小 3D 社團浮空群島"></div>
+      <div id="tilt-shift" class="tilt-shift-overlay"></div>
+      <div id="label-layer" class="label-layer"></div>
+
+      <!-- 頂部資訊導覽列 -->
+      <header class="topbar">
+        <div class="brand" style="cursor:pointer;" onclick="document.getElementById('tb-panorama').click()">
+          <div class="brand-logo" aria-hidden="true">🏰</div>
+          <div>
+            <h1>
+              馬鳴國小社團群島
+              <span class="beta">115 學年度・天空之城</span>
+            </h1>
+            <p>八大社團浮空島・即時動態與平面導覽｜臺中市外埔區馬鳴國民小學</p>
+          </div>
+        </div>
+
+        <div class="quote" aria-live="polite">
+          <span class="quote-tag">今日名言</span>
+          <p>
+            <span id="quote-text" class="quote-text">知之者不如好之者，好之者不如樂之者。</span>
+            <span id="quote-by" class="quote-by">—— 孔子《論語》</span>
+          </p>
+          <button id="quote-next" class="quote-next" title="換一句名言" aria-label="換一句名言">↻</button>
+        </div>
+
+        <div class="weather" aria-live="polite">
+          <div class="date">
+            <b id="clock-date">11 月 5 日</b>
+            <span id="clock-time">星期四・11:20</span>
+          </div>
+          <div id="wx-box" class="wx">
+            <span class="wx-icon">🌤️</span>
+            <div>
+              <b>讀取天氣…</b>
+              <span>臺中外埔區</span>
+            </div>
+          </div>
+          <div class="place">臺中外埔</div>
+        </div>
+      </header>
+
+      <!-- 左側社團即時雷達與日誌 -->
+      <aside id="club-log" class="log" aria-label="社團即時雷達與日誌">
+        <div class="log-head">
+          <h3>
+            馬鳴社團即時雷達
+            <span class="live-badge">LIVE</span>
+          </h3>
+        </div>
+        <p class="log-sub">點選下方時段模擬各社團上課動態，或點選公告飛往小島：</p>
+
+        <div class="sim-box">
+          <div class="sim-title">
+            <span>⚡ 上課時段動態模擬器</span>
+          </div>
+          <div id="sim-pills" class="sim-pills"></div>
+          <div id="sim-desc" style="margin-top:6px;font-size:11px;color:var(--ink-2);font-weight:600;"></div>
+        </div>
+
+        <ul id="log-news-list" class="news"></ul>
+      </aside>
+
+      <!-- 右側社團浮空島詳細資訊面板 -->
+      <aside id="detail-panel" class="panel hidden" aria-label="社團詳細資訊"></aside>
+
+      <!-- 清單與總表視圖 -->
+      <section id="list-view" class="listview hidden" aria-label="全部社團島清單"></section>
+
+      <!-- 自動導覽控制面板 -->
+      <section id="tour-box" class="tour hidden" aria-label="群島自動導覽"></section>
+
+      <!-- 跨域／場地串聯圖例說明 -->
+      <div id="legend-card" class="legend-card hidden">
+        <b>🌈 雲海空橋・場地與能力串聯</b>
+        <p>
+          金色光弧連結了共用專科教室（如 2F 視聽教室的太鼓初／進階、2F 英語教室的節奏樂／英語社）以及相鄰的 DOC 教室智高創客社，展現馬鳴多元學習生態系！
+        </p>
+      </div>
+
+      <!-- 左下角雲海尋寶小幫手 -->
+      <div class="guide">
+        <div
+          class="mascot"
+          title="點擊島上的白色小天馬收集彩蛋！"
+          onclick="document.getElementById('btn-tour').click()"
+        >
+          🦄
+        </div>
+        <div>
+          <b>天空之城・馬鳴雲端探索</b>
+          <span>
+            浮空島藏了 9 隻馬鳴小天馬，已找到 <strong id="mascot-count">0</strong> 隻
+          </span>
+          <span class="howto">左鍵拖曳旋轉・右鍵平移・滾輪縮放・點擊小島看社團</span>
+        </div>
+      </div>
+
+      <!-- 底部中央控制工具列 -->
+      <nav class="toolbar" aria-label="視角與互動工具列">
+        <div class="seg">
+          <button id="tb-panorama" class="tb on" title="斜角 3D 天空群島全景">全景</button>
+          <button id="tb-bird" class="tb" title="從雲海正上方俯瞰">鳥瞰</button>
+          <button id="tb-list" class="tb" title="115-1 社團總表與清單">清單</button>
+        </div>
+
+        <div class="seg">
+          <button id="tb-labels" class="tb on" title="顯示或隱藏浮空島名稱">島名</button>
+          <button id="tb-links" class="tb" title="顯示教室共用與跨域串聯光弧">跨域串聯</button>
+          <button id="tb-map" class="tb" title="開啟馬鳴國小平面圖教室定位">🗺️ 平面圖</button>
+          <button id="tb-anim" class="tb" title="暫停或播放 3D 動畫">暫停</button>
+          <button id="tb-time" class="tb" title="切換白天／黃昏／星夜浮空城">🕒 即時天色</button>
+          <button id="tb-fx" class="tb on" title="微縮模型移軸景深效果">特效</button>
+          <button id="tb-log" class="tb on" title="顯示或隱藏左側即時雷達">雷達</button>
+        </div>
+
+        <button id="btn-tour" class="tour-btn" title="自動巡航導覽 9 座浮空島">✈️ 群島導覽</button>
+        <button id="btn-quiz" class="quiz-btn" title="6 題測出最適合你的馬鳴社團">✨ 適性小測驗</button>
+        <button id="btn-slip" class="reg-btn" title="填寫與列印 115-1 社團報名回條">📝 報名回條</button>
+      </nav>
+
+      <!-- 多功能彈窗容器（平面圖／適性測驗／報名回條） -->
+      <div id="modal-wrap" class="modal-wrap hidden" role="dialog" aria-modal="true"></div>
+
+      <!-- Toast 提示訊息 -->
+      <div id="toast" class="toast hidden" role="status"></div>
+
+      <!-- 開場微縮模型組裝動畫 -->
+      <div id="intro-screen" class="intro">
+        <div class="intro-card">
+          <p class="eyebrow">HELLO, MMPS SKY ARCHIPELAGO</p>
+          <div class="intro-icon">🏰</div>
+          <h2>馬鳴國小社團群島</h2>
+          <p>115 學年度「天空之城」八大社團 3D 浮空島探索網</p>
+          <div class="intro-bar">
+            <i id="intro-bar-fill" style="width: 20%"></i>
+          </div>
+          <p id="intro-step-text" style="font-size: 13px; color: var(--muted); margin-bottom: 6px;">
+            凝聚天空之城飛行石能量…
+          </p>
+          <button id="intro-skip" class="intro-skip">立即進入雲海群島 ›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 載入本地 Three.js 引擎與模組 -->
+    <script src="./assets/three.min.js"></script>
+    <script src="./assets/club-data.js"></script>
+    <script src="./assets/scene-3d.js"></script>
+    <script src="./assets/app-ui.js"></script>
+  </body>
+</html>

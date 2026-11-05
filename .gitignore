@@ -1,0 +1,7 @@
+# 忽略含有原版學童與未去個資之原始檔
+*.doc
+*.docx
+*.tmp
+.DS_Store
+Thumbs.db
+node_modules/
