@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>馬鳴國小・天空打字群島｜三年級中英打字十指闖關與英雄榜</title>
+  <meta name="description" content="臺中市外埔區馬鳴國民小學「天空打字群島」：專為國小三年級設計的 3D 浮空島中英打字闖關網站，涵蓋基準鍵定位、英打字母、Shift 大小寫單字、注音符號鍵位、五聲調單字、雙字語詞、生活短句與混合魔王島。" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <div id="root">
+    <!-- 3D 畫布與微縮模型移軸濾鏡 -->
+    <div id="canvas-stage" class="stage"></div>
+    <div class="tilt-shift-overlay"></div>
+    <div id="label-layer" class="label-layer"></div>
+
+    <!-- 頂部品牌與個人星等工具列 -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">⌨️</div>
+        <div>
+          <h1>
+            馬鳴國小・天空打字群島
+            <span class="beta">三年級打字闖關</span>
+          </h1>
+          <p>十指基準鍵定位 ➔ 英打大小寫 ➔ 注音五聲調 ➔ 語詞與短句冒險</p>
+        </div>
+      </div>
+
+      <div class="profile-bar">
+        <button id="btn-open-avatar" class="tb on" title="修改角色姓名與服裝">
+          <span id="top-player-dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3a86ff;margin-right:4px;"></span>
+          👤 <span id="top-player-name">馬鳴小騎士</span>（換裝/改名）
+        </button>
+
+        <button id="btn-roam-toggle" class="action-pill" style="background:linear-gradient(135deg,#10b981,#059669);">
+          🏃 角色登島漫遊
+        </button>
+
+        <button id="btn-open-cert-top" class="action-pill" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+          ⭐ 總星數 <span id="total-stars-count">0 / 24</span>｜榮譽證書
+        </button>
+
+        <button id="btn-view" class="tb">🔭 全景視角</button>
+        <button id="btn-theme" class="tb">☀️ 晴空</button>
+        <button id="btn-sound" class="tb">🔊 音效：開</button>
+        <a href="../index.html" class="tb" style="background:#e6dac8;color:#2c221e;" title="前往馬鳴國小社團群島">🏝️ 回社團群島</a>
+      </div>
+    </header>
+
+    <!-- 角色漫遊模式頂部靠近提示 HUD -->
+    <div id="roam-hud" class="roam-hud hidden">
+      <span>🕹️ 漫遊操作：<span class="hud-key">W A S D</span> 或 <span class="hud-key">方向鍵</span> 移動｜<span class="hud-key">空白鍵</span> 跳躍</span>
+      <span>📍 目前所在：<strong id="roam-island-name">0. 鍵盤王國主島</strong></span>
+      <button id="btn-roam-play" class="hud-action">🎮 進入本島闖關</button>
+      <div style="display:inline-flex;gap:4px;margin-left:6px;">
+        <button class="hud-action" style="background:#3b82f6;" data-move="up">▲</button>
+        <button class="hud-action" style="background:#3b82f6;" data-move="left">◀</button>
+        <button class="hud-action" style="background:#3b82f6;" data-move="down">▼</button>
+        <button class="hud-action" style="background:#3b82f6;" data-move="right">▶</button>
+        <button class="hud-action" style="background:#f59e0b;" data-move="jump">跳</button>
+      </div>
+    </div>
+
+    <!-- 左側：國小三年級 8 大打字任務島進度清單 -->
+    <aside class="log" aria-label="打字闖關任務地圖">
+      <div class="log-head">
+        <h3>🗺️ 三年級打字闖關地圖</h3>
+      </div>
+      <p class="log-sub">點選任一島嶼可飛往該島並查看過關基準與排行榜</p>
+      <div id="mission-list" class="mission-list"></div>
+    </aside>
+
+    <!-- 右側：島嶼任務說明、小三基準與英雄排行榜面板 -->
+    <section id="detail-panel" class="panel" aria-label="島嶼詳情與英雄榜">
+      <div class="panel-head">
+        <div class="panel-nav">
+          <span style="font-size:12px;font-weight:800;color:var(--muted);">🏝️ 島嶼任務書 ＆ 英雄排行榜</span>
+          <button id="btn-close-detail" class="x" title="收合面板">×</button>
+        </div>
+      </div>
+      <div id="detail-content" class="panel-body"></div>
+    </section>
+
+    <!-- 底部：9 座島嶼快速切換列 -->
+    <nav class="toolbar" aria-label="島嶼快速導覽">
+      <div id="island-dock" class="island-dock"></div>
+    </nav>
+
+    <!-- =========================================================
+         🎮 打字闖關遊戲艙 (#typing-cockpit) ＆ 十指發光虛擬鍵盤
+         ========================================================= -->
+    <div id="typing-cockpit" class="cockpit-wrap hidden" role="dialog" aria-modal="true">
+      <div class="cockpit" style="position:relative;">
+        <!-- 座艙頂部資訊與即時成績列 -->
+        <div class="cp-header">
+          <div class="cp-title-box">
+            <h3 id="cp-island-title">島 1：基準鍵定位島</h3>
+            <div id="cp-rule-desc" style="font-size:12px;color:var(--ink-2);margin-top:2px;"></div>
+          </div>
+
+          <div class="cp-stats">
+            <div class="stat-pill">⏱️ 剩餘 <b id="cp-timer">60s</b></div>
+            <div class="stat-pill">🎯 已完成 <b id="cp-score">0</b></div>
+            <div class="stat-pill">✨ 正確率 <b id="cp-acc">100%</b></div>
+            <div class="stat-pill">🔥 連擊 <b id="cp-combo">0</b></div>
+            <div class="stat-pill">🏆 目前星等 <b id="cp-stars-live">☆☆☆</b></div>
+          </div>
+
+          <div style="display:flex;gap:6px;">
+            <button id="btn-cp-restart" class="tb" style="background:var(--paper);border:1px solid var(--line);">🔄 重新計時</button>
+            <button id="btn-cp-finish-now" class="tb" style="background:#fef3c7;border:1px solid #f59e0b;">🏁 提前結算</button>
+            <button id="btn-cp-close" class="tb" style="background:#fee2e2;color:#991b1b;">✕ 離開 (Esc)</button>
+          </div>
+        </div>
+
+        <!-- 題目展示與注音/按鍵逐鍵拆解舞台 -->
+        <div class="cp-stage">
+          <button id="cp-mode-toggle" class="tb" style="background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;font-size:12px;margin-bottom:4px;">
+            🎯 目前：注音按鍵導引模式（免切輸入法）
+          </button>
+
+          <div class="prompt-card">
+            <div id="cp-target-big" class="prompt-main">F</div>
+            <div id="cp-zy-steps" class="zy-steps-row"></div>
+            <div id="cp-hint-text" class="prompt-sub"></div>
+          </div>
+
+          <!-- 可選：真實中文輸入框 (IME) 模式 -->
+          <div id="cp-ime-wrap" class="ime-input-box hidden">
+            <input id="cp-ime-input" type="text" placeholder="請切到微軟注音，在此輸入上方國字..." autocomplete="off" />
+          </div>
+
+          <!-- 十指分工提示橫幅 -->
+          <div id="vk-finger-banner" class="finger-banner">
+            🖐️ 請把左手食指放在 F 鍵、右手食指放在 J 鍵（摸摸看有小凸點喔！）
+          </div>
+        </div>
+
+        <!-- 臺灣標準大千注音 + 英數 4 排發光虛擬鍵盤 -->
+        <div class="v-keyboard">
+          <div id="vk-rows-container" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <div class="finger-legend">
+            <span><i style="background:#ef476f"></i>左手小指</span>
+            <span><i style="background:#f78c6b"></i>左手無名指</span>
+            <span><i style="background:#ffd166"></i>左手中指</span>
+            <span><i style="background:#06d6a0"></i>左手食指(F凸點)</span>
+            <span><i style="background:#a855f7"></i>雙手大拇指(空白鍵一聲)</span>
+            <span><i style="background:#118ab2"></i>右手食指(J凸點)</span>
+            <span><i style="background:#3a86ff"></i>右手中指</span>
+            <span><i style="background:#8338ec"></i>右手無名指</span>
+            <span><i style="background:#ec4899"></i>右手小指</span>
+          </div>
+        </div>
+
+        <!-- 闖關完成結算覆蓋層 -->
+        <div id="cp-result-overlay" class="res-overlay hidden"></div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         👤 角色命名與造型自訂彈窗 (#avatar-modal)
+         ========================================================= -->
+    <div id="avatar-modal" class="modal-wrap hidden" role="dialog" aria-modal="true">
+      <div class="modal-card" style="max-width:460px;">
+        <button id="btn-close-avatar" class="x modal-close">×</button>
+        <h2 style="margin:0 0 6px;">👤 設定你的打字冒險家角色</h2>
+        <p style="margin:0 0 14px;font-size:13px;color:var(--ink-2);">
+          你的名字會顯示在 3D 人物頭頂名牌、各島英雄排行榜與榮譽證書上喔！（請填寫暱稱或名字即可）
+        </p>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label style="font-size:13px;font-weight:800;">
+            🌟 角色名字 / 暱稱
+            <input id="inp-player-name" type="text" maxlength="14" placeholder="例如：小天馬、3年甲班小傑" style="width:100%;margin-top:4px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);font-weight:800;" />
+          </label>
+
+          <label style="font-size:13px;font-weight:800;">
+            🎖️ 頭頂稱號徽章
+            <input id="inp-player-title" type="text" maxlength="14" placeholder="例如：三年級打字冒險家" style="width:100%;margin-top:4px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);font-weight:800;" />
+          </label>
+
+          <div>
+            <div style="font-size:13px;font-weight:800;">👕 上衣顏色</div>
+            <div class="avatar-colors">
+              <button class="color-dot" style="background:#3a86ff" data-shirt="#3a86ff" title="天空藍"></button>
+              <button class="color-dot" style="background:#10b981" data-shirt="#10b981" title="森林綠"></button>
+              <button class="color-dot" style="background:#ef476f" data-shirt="#ef476f" title="活力紅"></button>
+              <button class="color-dot" style="background:#f59e0b" data-shirt="#f59e0b" title="陽光橘"></button>
+              <button class="color-dot" style="background:#8338ec" data-shirt="#8338ec" title="魔法紫"></button>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:13px;font-weight:800;">🧢 帽子顏色</div>
+            <div class="avatar-colors">
+              <button class="color-dot" style="background:#fbbf24" data-hat="#fbbf24" title="金黃帽"></button>
+              <button class="color-dot" style="background:#ef4444" data-hat="#ef4444" title="紅探險帽"></button>
+              <button class="color-dot" style="background:#3b82f6" data-hat="#3b82f6" title="藍飛行帽"></button>
+              <button class="color-dot" style="background:#10b981" data-hat="#10b981" title="綠精靈帽"></button>
+              <button class="color-dot" style="background:#ec4899" data-hat="#ec4899" title="粉紅帽"></button>
+            </div>
+          </div>
+
+          <button id="btn-save-avatar" class="btn-primary-launch" style="background:linear-gradient(135deg,#10b981,#2563eb);margin-top:6px;">
+            ✅ 儲存角色並更新排行榜名牌
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         🏆 榮譽證書與總成績單彈窗 (#cert-modal)
+         ========================================================= -->
+    <div id="cert-modal" class="modal-wrap hidden" role="dialog" aria-modal="true">
+      <div class="modal-card" style="max-width:740px;">
+        <button id="btn-close-cert" class="x modal-close no-print">×</button>
+        <div id="cert-body"></div>
+        <div class="no-print" style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+          <button id="btn-print-cert" class="btn-primary-launch" style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:9px 18px;">
+            🖨️ 列印 / 另存 PDF 榮譽證書
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 載入 Three.js、小三打字題庫、3D 浮空島引擎與互動 UI -->
+  <script src="./assets/three.min.js"></script>
+  <script src="./assets/typing-data.js"></script>
+  <script src="./assets/scene-3d.js"></script>
+  <script src="./assets/app-ui.js"></script>
+</body>
+</html>
