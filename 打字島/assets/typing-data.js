@@ -537,6 +537,12 @@ window.MMPS_ISLANDS = [
   }
 ];
 
+// 建立島嶼 ID 快速查詢表
+window.MMPS_ISLANDS_MAP = {};
+window.MMPS_ISLANDS.forEach((isl) => {
+  window.MMPS_ISLANDS_MAP[isl.id] = isl;
+});
+
 // 學習路線串聯（由島1循序漸進到島8）
 window.MMPS_LINKS = [
   { from: "island1", to: "island2", label: "Step 1➔2：基準鍵延伸至 26 字母" },

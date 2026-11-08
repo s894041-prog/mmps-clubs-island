@@ -673,6 +673,7 @@
       combo: 0,
       maxCombo: 0
     };
+    window.game = game;
 
     function shuffleArray(arr) {
       const copy = arr.slice();
@@ -1251,8 +1252,176 @@
       });
     }
 
+    // =========================================================
+    // 11. 🎬 全自動實機示範機器人（產生人物 ➔ 島上走動跳躍 ➔ 第1~8關逐關實機打字）
+    // =========================================================
+    let demoRunning = false;
+    let demoAbort = false;
+
+    const demoBanner = document.createElement("div");
+    demoBanner.id = "demo-live-banner";
+    demoBanner.style.cssText =
+      "position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:80;background:rgba(17,24,39,0.95);color:#fff;border:2px solid #f472b6;border-radius:999px;padding:10px 22px;font-size:14.5px;font-weight:900;box-shadow:0 12px 32px rgba(0,0,0,0.45);display:none;align-items:center;gap:12px;white-space:nowrap;";
+    demoBanner.innerHTML = `
+      <span id="demo-step-text">🎬 實機示範準備中...</span>
+      <button id="btn-stop-demo" style="background:#ef4444;color:#fff;border:0;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:800;cursor:pointer;">⏹ 停止示範</button>
+    `;
+    document.body.appendChild(demoBanner);
+
+    document.getElementById("btn-stop-demo").addEventListener("click", () => {
+      demoAbort = true;
+      demoRunning = false;
+      demoBanner.style.display = "none";
+      ["KeyW", "KeyA", "KeyS", "KeyD"].forEach((code) =>
+        window.dispatchEvent(new KeyboardEvent("keyup", { code }))
+      );
+    });
+
+    function sleep(ms) {
+      return new Promise((r) => setTimeout(r, ms));
+    }
+
+    function setDemoText(msg) {
+      const el = document.getElementById("demo-step-text");
+      if (el) el.innerHTML = msg;
+    }
+
+    async function runInteractiveAutoDemo() {
+      if (demoRunning) return;
+      demoRunning = true;
+      demoAbort = false;
+      demoBanner.style.display = "inline-flex";
+
+      try {
+        // Step 1: 打開角色設定彈窗，示範取名與換裝
+        closeTypingCockpit();
+        certModal.classList.add("hidden");
+        setDemoText("🎬 步驟 1/3：點選上方【👤 換裝/改名】，建立自己的專屬小騎士角色！");
+        openAvatarModal();
+        await sleep(700);
+        if (demoAbort) return;
+
+        inputName.value = "";
+        const demoName = "3年甲班小天馬";
+        for (const ch of demoName) {
+          inputName.value += ch;
+          sfx.playHit(3);
+          await sleep(90);
+        }
+        inputTitle.value = "馬鳴打字小隊長";
+        profile.shirtColor = "#10b981";
+        profile.hatColor = "#ef4444";
+        profile.name = demoName;
+        profile.title = "馬鳴打字小隊長";
+        saveProfile(profile);
+        updateProfileUI();
+        await sleep(800);
+        if (demoAbort) return;
+        avatarModal.classList.add("hidden");
+
+        // Step 2: 啟動 3D 角色登島漫遊，示範走來走去與跳躍
+        setDemoText("🎬 步驟 2/3：啟動【🏃 角色登島漫遊】！用 W/A/S/D 控制小騎士在浮空島上跑步與跳躍！");
+        enableRoamWithIsland("hub");
+        detailPanelEl.classList.add("hidden");
+        await sleep(500);
+
+        const walkPlan = [
+          { code: "KeyW", ms: 900, jump: true },
+          { code: "KeyD", ms: 850, jump: false },
+          { code: "KeyS", ms: 850, jump: true },
+          { code: "KeyA", ms: 800, jump: false }
+        ];
+        for (const move of walkPlan) {
+          if (demoAbort) return;
+          window.dispatchEvent(new KeyboardEvent("keydown", { code: move.code }));
+          if (move.jump) {
+            await sleep(250);
+            window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space" }));
+            sfx.playHit(6);
+            await sleep(150);
+            window.dispatchEvent(new KeyboardEvent("keyup", { code: "Space" }));
+          }
+          await sleep(move.ms);
+          window.dispatchEvent(new KeyboardEvent("keyup", { code: move.code }));
+        }
+
+        // Step 3: 依序傳送到第 1 關 ~ 第 8 關，每一關實際自動按鍵試玩並過關拿三星！
+        const taskIds = ["island1", "island2", "island3", "island4", "island5", "island6", "island7", "island8"];
+        for (let idx = 0; idx < taskIds.length; idx++) {
+          if (demoAbort) return;
+          const islId = taskIds[idx];
+          const isl = window.MMPS_ISLANDS_MAP[islId];
+
+          setDemoText(`🎬 步驟 3/3：小騎士登陸【${isl.short}】！準備進入第 ${idx + 1}/8 關實機打字示範...`);
+          enableRoamWithIsland(islId);
+          selectIsland(islId, true);
+          window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyW" }));
+          await sleep(650);
+          window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyW" }));
+          window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space" }));
+          await sleep(200);
+          window.dispatchEvent(new KeyboardEvent("keyup", { code: "Space" }));
+          await sleep(600);
+          if (demoAbort) return;
+
+          // 打開該島打字遊戲艙
+          openTypingCockpit(islId);
+          setDemoText(`⌨️ 正在試玩【${isl.name}】：看下方發光鍵盤，跟著手指顏色按下對應按鍵！`);
+          await sleep(600);
+
+          // 自動示範打 10 ~ 14 個按鍵步驟，展示虛擬鍵盤發光、連擊與音效
+          const demoKeyPresses = isl.mode === "key_drill" || isl.mode === "zy_key" ? 8 : 12;
+          for (let k = 0; k < demoKeyPresses; k++) {
+            if (demoAbort || !game.active) break;
+            const step = game.steps[game.stepIndex];
+            if (!step) break;
+            window.dispatchEvent(
+              new KeyboardEvent("keydown", {
+                code: step.code,
+                shiftKey: !!step.needShift
+              })
+            );
+            await sleep(210);
+          }
+          if (demoAbort) return;
+
+          // 直接達成該關三星金獎分數並顯示結算畫面
+          game.completedCount = Math.max(game.completedCount, isl.thresholds.gold);
+          updateCockpitHUD();
+          finishRound();
+          setDemoText(`🎉【${isl.short}】恭喜拿下 ⭐⭐⭐ 金星！3D 島嶼上空已升起旋轉金星！`);
+          await sleep(1350);
+          if (demoAbort) return;
+          closeTypingCockpit();
+        }
+
+        // 全部 8 關示範完畢，回到主島展示 24 顆旋轉金星與榮譽證書
+        setDemoText("🏆 8 大打字島全數試玩過關（24/24 ⭐）！自動開啟【馬鳴國小打字榮譽證書】！");
+        selectIsland("hub", true);
+        enableRoamWithIsland("hub");
+        await sleep(900);
+        if (!demoAbort) {
+          openCertificateModal();
+        }
+        await sleep(4000);
+      } finally {
+        demoRunning = false;
+        demoBanner.style.display = "none";
+      }
+    }
+
+    const btnAutoDemo = document.getElementById("btn-auto-demo");
+    if (btnAutoDemo) {
+      btnAutoDemo.addEventListener("click", () => runInteractiveAutoDemo());
+    }
+
     // 初始載入主島
     refreshProgressUI();
     selectIsland("hub", false);
+
+    // 若網址帶有 ?demo=1 則自動啟動實機示範
+    if (window.location.search.includes("demo=1")) {
+      setTimeout(() => runInteractiveAutoDemo(), 700);
+    }
   });
 })();
