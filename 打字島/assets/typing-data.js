@@ -4,7 +4,9 @@ window.TYPING_CONFIG = {
   subtitle: "三年級中英打字冒險島・十指鍵盤與注音闖關",
   schoolName: "臺中市外埔區馬鳴國民小學",
   gradeStandard: "國小三年級資訊教育基準",
-  coordinates: { lat: 24.324, lon: 120.654, place: "臺中外埔" }
+  coordinates: { lat: 24.324, lon: 120.654, place: "臺中外埔" },
+  gasEndpoint: "https://script.google.com/macros/s/AKfycbziQsxtqB3TjastVjYe_NUzzhnC6sqx47ZBze8I8XiUykTpzV3HvIA9uz_oQyF74SSe/exec",
+  sheetUrl: "https://docs.google.com/spreadsheets/d/18wjBHdrX1-dTkLO44P69Rultnt9jBNqLOLeWOztQB6E/edit?gid=0#gid=0"
 };
 
 // 十指分工顏色與名稱定義

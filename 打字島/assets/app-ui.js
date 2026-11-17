@@ -387,17 +387,69 @@
       renderIslandDetail(selectedIslandId);
     }
 
-    // 建立單島排行榜（合併玩家最佳紀錄與小三 NPC 基準）
-    function getIslandLeaderboard(island) {
-      const list = (island.npcBenchmarks || []).map((n) => ({
-        name: n.name,
-        score: n.score,
-        stars: n.stars,
-        acc: n.acc,
-        detail: n.detail,
-        isPlayer: false
-      }));
+    // =========================================================
+    // 4.5. Google 試算表雲端排行榜連線與成績同步
+    // =========================================================
+    let cloudRecords = [];
 
+    async function fetchCloudLeaderboard() {
+      const endpoint = window.TYPING_CONFIG && window.TYPING_CONFIG.gasEndpoint;
+      if (!endpoint) return;
+      try {
+        const resp = await fetch(endpoint);
+        const data = await resp.json();
+        if (data && data.status === "ok" && Array.isArray(data.records)) {
+          cloudRecords = data.records;
+          if (selectedIslandId && detailPanelEl && !detailPanelEl.classList.contains("hidden")) {
+            renderIslandDetail(selectedIslandId);
+          }
+        }
+      } catch (e) {
+        console.warn("無法讀取 Google 試算表雲端排行榜:", e);
+      }
+    }
+
+    function submitCloudRecord(island, score, acc, stars) {
+      const endpoint = window.TYPING_CONFIG && window.TYPING_CONFIG.gasEndpoint;
+      if (!endpoint || !score) return;
+      try {
+        const params = new URLSearchParams({
+          action: "submit",
+          islandId: island.id,
+          islandName: island.name,
+          name: profile.name,
+          title: profile.title,
+          score: String(score),
+          unit: island.unit || "字",
+          acc: String(acc),
+          stars: String(stars)
+        });
+        fetch(`${endpoint}?${params.toString()}`, { mode: "no-cors" }).catch(() => {});
+        setTimeout(() => fetchCloudLeaderboard(), 1800);
+      } catch (e) {
+        console.warn("上傳成績至 Google 試算表失敗:", e);
+      }
+    }
+
+    // 自動補上傳：如果小朋友電腦本機原本就有過關歷史紀錄，自動補傳到 Google 試算表
+    function syncExistingLocalRecordsToCloud() {
+      const taskIslands = (window.MMPS_ISLANDS || []).filter((x) => x.id !== "hub");
+      taskIslands.forEach((isl, i) => {
+        const rec = records[isl.id];
+        if (rec && rec.bestScore > 0) {
+          setTimeout(() => {
+            submitCloudRecord(isl, rec.bestScore, rec.bestAcc || 100, rec.bestStars || 1);
+          }, i * 350);
+        }
+      });
+    }
+
+    // 建立單島排行榜（合併全班同學成績、個人最佳紀錄與小三 NPC 基準）
+    function getIslandLeaderboard(island) {
+      const list = [];
+      const seenNames = new Set();
+
+      // 1. 本地玩家個人最佳紀錄
       const rec = records[island.id];
       if (rec && rec.bestScore > 0) {
         list.push({
@@ -408,7 +460,46 @@
           detail: `${rec.bestScore} ${island.unit}｜正確率 ${rec.bestAcc}%`,
           isPlayer: true
         });
+        seenNames.add(profile.name);
       }
+
+      // 2. 雲端 Google 試算表全班其他同學真實成績
+      const islandCloud = cloudRecords.filter((r) => r.islandId === island.id);
+      const studentBest = {};
+      islandCloud.forEach((r) => {
+        if (!r.name) return;
+        if (!studentBest[r.name] || Number(r.score) > Number(studentBest[r.name].score)) {
+          studentBest[r.name] = r;
+        }
+      });
+
+      Object.values(studentBest).forEach((r) => {
+        if (seenNames.has(r.name)) return;
+        seenNames.add(r.name);
+        list.push({
+          name: `🎒 ${r.name}`,
+          score: Number(r.score) || 0,
+          stars: Number(r.stars) || 1,
+          acc: Number(r.acc) || 0,
+          detail: `${r.score} ${r.unit || island.unit}｜正確率 ${r.acc}%${r.title ? ` (${r.title})` : ""}`,
+          isPlayer: false,
+          isCloud: true
+        });
+      });
+
+      // 3. 小三基準 NPC 守衛
+      (island.npcBenchmarks || []).forEach((n) => {
+        list.push({
+          name: n.name,
+          score: n.score,
+          stars: n.stars,
+          acc: n.acc,
+          detail: n.detail,
+          isPlayer: false,
+          isNpc: true
+        });
+      });
+
       list.sort((a, b) => b.score - a.score || b.acc - a.acc);
       return list;
     }
@@ -505,6 +596,7 @@
               ? `<button id="btn-open-cert" class="btn-secondary-cert">🏆 檢視全島總榜 ＆ 列印打字榮譽證書</button>`
               : `<button id="btn-teleport-here" class="btn-secondary-cert">🏃 傳送我的人物到這座島上</button>`
           }
+          <a href="${window.TYPING_CONFIG.sheetUrl}" target="_blank" rel="noopener noreferrer" class="btn-secondary-cert" style="text-align:center;text-decoration:none;display:block;">📊 開啟 Google 試算表（全班成績單）</a>
         </div>
 
         <div class="dp-section">
@@ -518,7 +610,10 @@
         </div>
 
         <div class="dp-section">
-          <h3>🏅 本島英雄排行榜（含小三基準守衛）</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <h3 style="margin:0;">🏅 本島英雄排行榜</h3>
+            <span style="font-size:11px;font-weight:800;color:#10b981;background:#ecfdf5;padding:2px 8px;border-radius:999px;">● 雲端全班同步中</span>
+          </div>
           <div class="lb-list">${boardHtml}</div>
         </div>
       `;
@@ -961,6 +1056,11 @@
         updatedAt: new Date().toISOString()
       };
       saveRecords(records);
+
+      if (game.completedCount > 0) {
+        submitCloudRecord(isl, game.completedCount, acc, stars);
+      }
+
       refreshProgressUI();
 
       const starBig = stars > 0 ? "⭐".repeat(stars) : "💪 再接再厲";
@@ -1415,9 +1515,12 @@
       btnAutoDemo.addEventListener("click", () => runInteractiveAutoDemo());
     }
 
-    // 初始載入主島
+    // 初始載入主島與雲端排行榜
     refreshProgressUI();
     selectIsland("hub", false);
+    fetchCloudLeaderboard();
+    syncExistingLocalRecordsToCloud();
+    setInterval(() => fetchCloudLeaderboard(), 15000);
 
     // 若網址帶有 ?demo=1 則自動啟動實機示範
     if (window.location.search.includes("demo=1")) {
