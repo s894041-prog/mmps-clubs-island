@@ -160,7 +160,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 天空島主 小天馬", score: 24, stars: 3, acc: 98, detail: "8 島全金星大滿貫" },
-      { name: "🥈 鍵盤隊長 阿豪", score: 16, stars: 2, acc: 92, detail: "8 島全銀星達成" },
+      { name: "🥈 鍵盤隊長 飛天馬", score: 16, stars: 2, acc: 92, detail: "8 島全銀星達成" },
       { name: "🥉 三年級守衛 小葵", score: 8, stars: 1, acc: 86, detail: "8 島全銅星過關" }
     ],
     prompts: []
@@ -190,7 +190,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 36, stars: 3, acc: 97, detail: "36 鍵 / 60秒" },
-      { name: "🥈 熟練學長 阿豪", score: 25, stars: 2, acc: 91, detail: "25 鍵 / 60秒" },
+      { name: "🥈 熟練學長 飛天馬", score: 25, stars: 2, acc: 91, detail: "25 鍵 / 60秒" },
       { name: "🥉 新手守衛 機器人", score: 15, stars: 1, acc: 85, detail: "15 鍵 / 60秒 (小三過關基準)" }
     ],
     prompts: [
@@ -229,7 +229,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 34, stars: 3, acc: 96, detail: "34 鍵 / 60秒" },
-      { name: "🥈 熟練學長 阿豪", score: 22, stars: 2, acc: 90, detail: "22 鍵 / 60秒" },
+      { name: "🥈 熟練學長 飛天馬", score: 22, stars: 2, acc: 90, detail: "22 鍵 / 60秒" },
       { name: "🥉 新手守衛 機器人", score: 12, stars: 1, acc: 85, detail: "12 鍵 / 60秒 (小三過關基準)" }
     ],
     prompts: [
@@ -273,7 +273,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 52, stars: 3, acc: 95, detail: "52 字母 (約11單字)" },
-      { name: "🥈 熟練學長 阿豪", score: 35, stars: 2, acc: 89, detail: "35 字母 (約7單字)" },
+      { name: "🥈 熟練學長 飛天馬", score: 35, stars: 2, acc: 89, detail: "35 字母 (約7單字)" },
       { name: "🥉 新手守衛 機器人", score: 20, stars: 1, acc: 82, detail: "20 字母 (小三過關基準)" }
     ],
     prompts: [
@@ -320,7 +320,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 30, stars: 3, acc: 96, detail: "30 個注音 / 60秒" },
-      { name: "🥈 熟練學長 阿豪", score: 18, stars: 2, acc: 90, detail: "18 個注音 / 60秒" },
+      { name: "🥈 熟練學長 飛天馬", score: 18, stars: 2, acc: 90, detail: "18 個注音 / 60秒" },
       { name: "🥉 新手守衛 機器人", score: 10, stars: 1, acc: 85, detail: "10 個注音 (小三過關基準)" }
     ],
     prompts: [
@@ -388,7 +388,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 15, stars: 3, acc: 96, detail: "15 個國字 / 60秒" },
-      { name: "🥈 熟練學長 阿豪", score: 9, stars: 2, acc: 91, detail: "9 個國字 / 60秒" },
+      { name: "🥈 熟練學長 飛天馬", score: 9, stars: 2, acc: 91, detail: "9 個國字 / 60秒" },
       { name: "🥉 新手守衛 機器人", score: 5, stars: 1, acc: 85, detail: "5 個國字 (小三過關基準)" }
     ],
     prompts: [
@@ -436,7 +436,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 16, stars: 3, acc: 97, detail: "16 詞 (32字 / 90秒)" },
-      { name: "🥈 熟練學長 阿豪", score: 10, stars: 2, acc: 91, detail: "10 詞 (20字 / 90秒)" },
+      { name: "🥈 熟練學長 飛天馬", score: 10, stars: 2, acc: 91, detail: "10 詞 (20字 / 90秒)" },
       { name: "🥉 新手守衛 機器人", score: 6, stars: 1, acc: 86, detail: "6 詞 (12字 小三過關基準)" }
     ],
     prompts: [
@@ -484,7 +484,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 8, stars: 3, acc: 97, detail: "8 句短句 / 90秒" },
-      { name: "🥈 熟練學長 阿豪", score: 5, stars: 2, acc: 91, detail: "5 句短句 / 90秒" },
+      { name: "🥈 熟練學長 飛天馬", score: 5, stars: 2, acc: 91, detail: "5 句短句 / 90秒" },
       { name: "🥉 新手守衛 機器人", score: 3, stars: 1, acc: 86, detail: "3 句短句 (小三過關基準)" }
     ],
     prompts: [
@@ -523,7 +523,7 @@ window.MMPS_ISLANDS = [
     ],
     npcBenchmarks: [
       { name: "🥇 守關隊長 小天馬", score: 55, stars: 3, acc: 97, detail: "55 字元 / 90秒" },
-      { name: "🥈 熟練學長 阿豪", score: 36, stars: 2, acc: 91, detail: "36 字元 / 90秒" },
+      { name: "🥈 熟練學長 飛天馬", score: 36, stars: 2, acc: 91, detail: "36 字元 / 90秒" },
       { name: "🥉 新手守衛 機器人", score: 20, stars: 1, acc: 85, detail: "20 字元 (小三過關基準)" }
     ],
     prompts: [

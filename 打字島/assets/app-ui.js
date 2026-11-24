@@ -412,6 +412,7 @@
     function submitCloudRecord(island, score, acc, stars) {
       const endpoint = window.TYPING_CONFIG && window.TYPING_CONFIG.gasEndpoint;
       if (!endpoint || !score) return;
+      if (profile.name.includes("蔡小益") || profile.name.includes("阿豪")) return;
       try {
         const params = new URLSearchParams({
           action: "submit",
@@ -468,6 +469,7 @@
       const studentBest = {};
       islandCloud.forEach((r) => {
         if (!r.name) return;
+        if (r.name.includes("蔡小益") || r.name.includes("阿豪") || r.name.includes("測試小騎士")) return;
         if (!studentBest[r.name] || Number(r.score) > Number(studentBest[r.name].score)) {
           studentBest[r.name] = r;
         }
